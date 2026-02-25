@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#020106] text-white antialiased selection:bg-purple-500/40;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+.border-gradient {
+  position: relative;
+  border-radius: 2.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1px;
+  overflow: hidden;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent 0 340deg, #a855f7 360deg);
+  animation: rotate 4s linear infinite;
+  z-index: -1;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.glass-content {
+  @apply bg-[#08080a]/95 backdrop-blur-3xl rounded-[2.4rem] h-full w-full p-10;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.btn-shiny {
+  @apply relative overflow-hidden transition-all duration-500
+         bg-gradient-to-tr from-purple-600 to-blue-600 
+         hover:shadow-[0_0_50px_rgba(168,85,247,0.5)]
+         active:scale-95 disabled:opacity-50;
+}
+
+.btn-shiny::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent;
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+}
+
+.btn-shiny:hover::after {
+  transform: translateX(100%);
+}
+
+.text-glow {
+  text-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
