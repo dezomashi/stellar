@@ -1,59 +1,62 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { motion } from "framer-motion";
-import { Wallet, Globe, Cpu } from "lucide-react";
 import { fakeWallet } from "../utils/fakeWallet";
 
 export default function Header({ onConnect }) {
   const [userAddress, setUserAddress] = useState(null);
+  const [isDemo, setIsDemo] = useState(false);
 
   const handleConnect = async (isFake = false) => {
     if (isFake) {
       setUserAddress(fakeWallet.address);
-      onConnect(fakeWallet.signer);
+      setIsDemo(true);
+      onConnect(fakeWallet.signer, true);
       return;
     }
     if (!window.ethereum) return alert("Install MetaMask");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    setUserAddress(await signer.getAddress());
-    onConnect(signer);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const signer = await provider.getSigner();
+      setUserAddress(accounts[0]);
+      setIsDemo(false);
+      onConnect(signer, false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const logout = () => {
+    setUserAddress(null);
+    setIsDemo(false);
+    onConnect(null, false);
   };
 
   return (
-    <motion.header 
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="fixed top-0 w-full z-50 p-6 flex justify-center"
-    >
-      <div className="w-full max-w-7xl flex justify-between items-center bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-2xl px-8 py-3 shadow-2xl">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-600/20 rounded-lg border border-purple-500/30">
-            <Cpu size={20} className="text-purple-400" />
-          </div>
-          <span className="text-xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-            Stellar<span className="text-purple-500">.</span>
-          </span>
+    <header className="fixed top-0 w-full z-50 p-6 flex justify-center text-white">
+      <div className="w-full max-w-7xl flex justify-between items-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl px-8 py-3">
+        <div className="flex items-center gap-2 group cursor-default">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg rotate-12 transition-transform duration-500" />
+          <span className="text-xl font-black tracking-tighter uppercase italic">Stellar</span>
         </div>
         
         <div className="flex gap-4 items-center">
           {userAddress ? (
-            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-3 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-mono font-bold text-green-400">{userAddress.slice(0, 6)}...{userAddress.slice(-4)}</span>
-            </motion.div>
-          ) : (
-            <div className="flex items-center gap-6">
-              <button onClick={() => handleConnect(true)} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-purple-400 transition-colors">
-                <Globe size={14} /> Demo
-              </button>
-              <button onClick={() => handleConnect(false)} className="btn-shiny px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-                <Wallet size={14} /> Connect
-              </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 font-mono text-[10px] font-bold tracking-widest">
+                <div className={`w-2 h-2 rounded-full ${isDemo ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`} />
+                {userAddress.slice(0, 6)}...{userAddress.slice(-4)} {isDemo && "(DEMO)"}
+              </div>
+              <button onClick={logout} className="text-[10px] font-bold uppercase tracking-widest text-red-400 hover:text-red-300 transition">Exit</button>
             </div>
+          ) : (
+            <>
+              <button onClick={() => handleConnect(true)} className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition">Demo</button>
+              <button onClick={() => handleConnect(false)} className="bg-gradient-to-tr from-purple-600 to-blue-500 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">Connect</button>
+            </>
           )}
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

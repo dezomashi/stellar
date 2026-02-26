@@ -13,7 +13,6 @@ export default function Home() {
   const [systemLogs, setSystemLogs] = useState([]);
   const [isClient, setIsClient] = useState(false);
 
-  // Исправление Hydration: ждем монтирования в браузере
   useEffect(() => {
     setIsClient(true);
     
@@ -77,7 +76,6 @@ export default function Home() {
     setTimeout(() => setShowToast(false), 5000);
   };
 
-  // Пока не клиент — возвращаем пустой экран, чтобы избежать ошибок гидратации
   if (!isClient) return <div className="bg-[#020106] w-screen h-screen" />;
 
   return (
@@ -94,9 +92,10 @@ export default function Home() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-      <Header onConnect={(s) => {
+      <Header onConnect={(s, demoStatus) => {
         setSigner(s);
-        notify("Authorization Success: Wallet Linked", "connect");
+        
+        notify(s ? "Wallet Connected" : "Logged Out", "connect");
       }} />
       
       <main className="relative z-10 h-full flex items-center justify-center">
