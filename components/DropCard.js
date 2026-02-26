@@ -10,10 +10,11 @@ export default function DropCard({ signer, onMintSuccess }) {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleMint = async () => {
-    if (!signer) {
-      alert("Please connect your wallet first!");
-      return;
-    }
+  console.log("Проверка signer...", signer);
+  if (!signer) {
+    alert("Сначала подключи кошелек!");
+    return;
+  }
 
     setIsMinting(true);
     setIsSuccess(false);
@@ -115,16 +116,20 @@ export default function DropCard({ signer, onMintSuccess }) {
               </div>
             </div>
 
-            {/* Кнопка действия */}
+            
             <button
-              onClick={handleMint}
-              disabled={isMinting}
-              className="btn-shiny group/btn w-full py-5 rounded-[1.8rem] flex items-center justify-center gap-3 active:scale-95 disabled:scale-100"
-            >
-              <span className="font-black text-[11px] uppercase tracking-[0.4em] text-white">
-                {isMinting ? "Processing..." : isSuccess ? "Mint Another" : "Mint Core NFT"}
-              </span>
-              {!isMinting && <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />}
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  console.log("вызываю handleMint...");
+                  handleMint();
+                }}
+                disabled={isMinting}
+                className="btn-shiny w-full py-5 rounded-[1.8rem] flex items-center justify-center gap-3 active:scale-95 transition-all z-20"
+              >
+                <span className="font-black text-[11px] uppercase tracking-[0.4em] text-white">
+                  {isMinting ? "Broadcasting..." : "Mint Core NFT"}
+                </span>
+                {!isMinting && <ChevronRight size={18} />}
             </button>
 
             {/* Футер карточки */}
