@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ShieldCheck, Zap, Layers, ChevronRight } from "lucide-react";
 import { fakeContract } from "../utils/fakeWallet";
+import { getContract, mintNFT } from "../utils/contract";
 
 export default function DropCard({ signer, onMintSuccess }) {
   const [claimed, setClaimed] = useState(fakeContract.claimed);
