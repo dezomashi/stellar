@@ -12,11 +12,16 @@ export default function DropCard({ signer, onMintSuccess }) {
 
   const fetchContractData = async () => {
     try {
-      const provider = new ethers.JsonRpcProvider("https://rpc.ankr.com");
+      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
       const contract = getContract(provider);
+      
       const current = await contract.totalSupply();
-      const max = await contract.maxSupply();
-      setSupply({ current: Number(current), max: Number(max) });
+      const max = await contract.MAX_SUPPLY();
+      
+      setSupply({
+        current: Number(current),
+        max: Number(max)
+      });
     } catch (e) {
       console.error("Data fetch error:", e);
     }
@@ -24,7 +29,7 @@ export default function DropCard({ signer, onMintSuccess }) {
 
   useEffect(() => {
     fetchContractData();
-    const interval = setInterval(fetchContractData, 15000);
+    const interval = setInterval(fetchContractData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -41,7 +46,11 @@ export default function DropCard({ signer, onMintSuccess }) {
     try {
       await mintNFT(signer, 1);
       setIsSuccess(true);
-      await fetchContractData();
+      
+      setTimeout(async () => {
+        await fetchContractData();
+      }, 2000);
+
       if (onMintSuccess) onMintSuccess();
     } catch (e) {
       console.error("Mint error:", e);
@@ -59,13 +68,15 @@ export default function DropCard({ signer, onMintSuccess }) {
       animate={{ y: 0, opacity: 1 }}
       className="relative w-full max-w-[450px] px-6 z-10 group"
     >
-      <div className="border-gradient shadow-[0_0_80px_rgba(168,85,247,0.1)]">
+      <div className="border-gradient shadow-[0_0_80px_rgba(168,85,247,0.1)] transition-all duration-700">
         <div className="glass-content relative overflow-hidden">
+          
           <div className="relative aspect-square mb-10 overflow-hidden rounded-[2rem] border border-white/5 bg-[#050505]">
             <div className="w-full h-full flex items-center justify-center relative">
               <span className={`text-8xl transition-all duration-1000 ${isSuccess ? 'scale-110 rotate-12 drop-shadow-[0_0_60px_#a855f7]' : ''} ${isMinting ? 'blur-sm grayscale' : 'drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]'}`}>
                 {isSuccess ? '🪐' : '💎'}
               </span>
+
               <AnimatePresence>
                 {isMinting && (
                   <motion.div 
@@ -105,14 +116,17 @@ export default function DropCard({ signer, onMintSuccess }) {
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="h-full bg-gradient-to-r from-purple-600 to-blue-500"
+                  className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-blue-500"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <button
-                onClick={handleMint}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMint();
+                }}
                 disabled={isMinting}
                 className="btn-shiny w-full py-5 rounded-[1.8rem] flex items-center justify-center gap-3 active:scale-95 transition-all z-20"
               >
