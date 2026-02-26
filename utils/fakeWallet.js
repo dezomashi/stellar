@@ -10,7 +10,7 @@ export const fakeWallet = {
 export const fakeContract = {
   totalSupply: 5000,
   maxSupply: 5000,
-  claimed: 1240, // Начальное значение для красоты
+  claimed: 0, 
   async claim() {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
