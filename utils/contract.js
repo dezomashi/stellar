@@ -1,11 +1,13 @@
 import { ethers } from "ethers";
 
-export const CONTRACT_ADDRESS = "0xbf7d34B58D05B17AdC1B59121a61Fde0ae27f7e9";
+export const CONTRACT_ADDRESS = "0x98EFCddD00c1E752844C9BAac0073cc135d25AF7";
 
 export const CONTRACT_ABI = [
   "function mint(uint256 quantity) public payable",
   "function totalSupply() view returns (uint256)",
-  "function MAX_SUPPLY() view returns (uint256)"
+  "function MAX_SUPPLY() view returns (uint256)",
+  "function tokenURI(uint256 tokenId) view returns (string)", 
+  "function setBaseURI(string memory baseURI) public"         
 ];
 
 export const getContract = (signerOrProvider) => {
@@ -27,7 +29,7 @@ export const mintNFT = async (signer, quantity = 1) => {
         params: [{
           chainId: chainId,
           chainName: 'Sepolia Test Network',
-          rpcUrls: ['https://rpc.ankr.com'],
+          rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'], 
           nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
           blockExplorerUrls: ['https://sepolia.etherscan.io']
         }],
