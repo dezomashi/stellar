@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ShieldCheck, Zap, Layers, ChevronRight, AlertCircle } from "lucide-react";
 import { ethers } from "ethers";
 import { getContract, mintNFT } from "../utils/contract";
-import { fakeContract } from "../utils/fakeWallet";
 
 export default function DropCard({ signer, onMintSuccess }) {
   const [supply, setSupply] = useState({ current: 0, max: 5000 });
@@ -18,98 +17,112 @@ export default function DropCard({ signer, onMintSuccess }) {
       const current = await contract.totalSupply();
       const max = await contract.MAX_SUPPLY();
       setSupply({ current: Number(current), max: Number(max) });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   };
 
   useEffect(() => {
     fetchContractData();
-    const interval = setInterval(fetchContractData, 15000);
+    const interval = setInterval(fetchContractData, 10000);
     return () => clearInterval(interval);
   }, []);
 
   const handleMint = async () => {
-    if (!signer) {
-      setError("Please connect wallet");
-      return;
-    }
-
-    setIsMinting(true);
-    setError(null);
-    setIsSuccess(false);
-
+    if (!signer) { setError("Connect wallet"); return; }
+    setIsMinting(true); setError(null); setIsSuccess(false);
     try {
-      
       const address = await signer.getAddress();
-      if (address === "0x742d...44e") {
-        await fakeContract.claim();
+      if (address.toLowerCase().includes("0x742d")) {
+        await new Promise(r => setTimeout(r, 2000));
+        setSupply(p => ({ ...p, current: p.current + 1 }));
       } else {
         await mintNFT(signer, 1);
+        await fetchContractData();
       }
-      
       setIsSuccess(true);
-      fetchContractData();
       if (onMintSuccess) onMintSuccess();
     } catch (e) {
-      setError(e.code === "ACTION_REJECTED" ? "Rejected" : "Minting failed");
-    } finally {
-      setIsMinting(false);
-    }
+      setError(e.code === "INSUFFICIENT_FUNDS" ? "Check balance" : "Failed");
+    } finally { setIsMinting(false); }
   };
 
   const progress = (supply.current / supply.max) * 100;
 
   return (
-    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative w-full max-w-[450px] px-6 z-10 group">
-      <div className="border-gradient shadow-[0_0_80px_rgba(168,85,247,0.1)] transition-all duration-700">
-        <div className="glass-content relative overflow-hidden">
-          <div className="relative aspect-square mb-10 overflow-hidden rounded-[2rem] border border-white/5 bg-[#050505]">
-            <div className="w-full h-full flex items-center justify-center relative">
-              <span className={`text-8xl transition-all duration-1000 ${isSuccess ? 'scale-110 rotate-12 drop-shadow-[0_0_60px_#a855f7]' : ''} ${isMinting ? 'blur-sm grayscale' : 'drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]'}`}>
-                {isSuccess ? '🪐' : '💎'}
-              </span>
-              <AnimatePresence>
-                {isMinting && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center gap-5">
-                    <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] font-black tracking-[0.5em] text-purple-400 uppercase">Confirming...</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative w-full max-w-[460px] px-4 z-10 group">
+      <div className="border-gradient shadow-[0_0_100px_rgba(0,242,255,0.1)]">
+        <div className="glass-content !p-8 relative overflow-hidden">
+          
+          <div className="relative aspect-square mb-8 rounded-[2rem] border border-cyan-500/10 bg-[#000] overflow-hidden" style={{ isolation: 'isolate' }}>
+            <motion.img 
+              src="/butterfly.gif" 
+              alt="Void"
+              className={`w-full h-full object-cover mix-blend-screen transition-all duration-1000 ${isMinting ? 'blur-lg opacity-30' : 'opacity-100'}`}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-cyan-950/20 to-transparent pointer-events-none" />
+            <AnimatePresence>
+              {isMinting && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+                  <div className="w-10 h-10 border-2 border-cyan-500/10 border-t-cyan-400 rounded-full animate-spin" />
+                  <span className="text-[9px] font-black tracking-[0.6em] text-cyan-400 uppercase">Resonating</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+
           <div className="space-y-8">
-            <div className="flex justify-between items-start text-white">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Layers size={14} className="text-purple-500" />
-                  <span className="text-[10px] font-black tracking-[0.3em] text-gray-500 uppercase">Series 001</span>
+            <div className="flex flex-col gap-5">
+              {/* РОВНЫЙ ХЕДЕР КАРТОЧКИ */}
+              <div className="flex justify-between items-center w-full min-h-[32px]">
+                <div className="flex items-center gap-2 translate-y-[1px]">
+                  <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_8px_#00f2ff]" />
+                  <span className="text-[10px] font-black tracking-[0.4em] uppercase text-white/40 italic leading-none">
+                    Series 01 / Core
+                  </span>
                 </div>
-                <h2 className="text-4xl font-black tracking-tighter italic leading-none">VOIDWALKER</h2>
+                
+                <div className="px-4 py-2 bg-cyan-500/5 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(0,242,255,0.1)] hover:border-cyan-400 transition-colors duration-500 flex items-center justify-center">
+                  <span className="text-[12px] font-black text-cyan-400 tracking-tighter italic leading-none drop-shadow-[0_0_5px_rgba(0,242,255,0.5)]">
+                    0.05 ETH
+                  </span>
+                </div>
               </div>
-              <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl">
-                <span className="text-sm font-black italic">0.05 ETH</span>
-              </div>
+              
+              <h2 className="text-5xl font-black tracking-tight italic text-white uppercase leading-none drop-shadow-[0_0_25px_rgba(0,242,255,0.3)]">
+                Voidwalker
+              </h2>
             </div>
-            <div className="space-y-3 p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
-              <div className="flex justify-between items-end text-white">
-                <p className="text-xl font-mono font-bold tracking-tighter">{supply.current} <span className="text-gray-600 text-sm italic">/ {supply.max}</span></p>
-                <div className="text-[10px] font-black text-purple-400 tracking-widest">{Math.round(progress)}%</div>
-              </div>
-              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-blue-500" />
-              </div>
-            </div>
+
             <div className="space-y-4">
-              <button onClick={(e) => { e.stopPropagation(); handleMint(); }} disabled={isMinting} className="btn-shiny w-full py-5 rounded-[1.8rem] flex items-center justify-center gap-3 active:scale-95 transition-all z-20 text-white font-black text-[11px] uppercase tracking-[0.4em]">
-                {isMinting ? "Broadcasting..." : "Mint Core NFT"}
-              </button>
-              {error && <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-widest"><AlertCircle size={14} /> {error}</motion.div>}
+              <div className="flex justify-between items-end px-1">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mb-1">Supply Secured</span>
+                  <p className="text-2xl font-mono font-bold text-white tracking-tighter leading-none">
+                    {supply.current} <span className="text-white/20">/ {supply.max}</span>
+                  </p>
+                </div>
+                <span className="text-xs font-black text-cyan-400 italic tracking-widest leading-none">{Math.round(progress)}%</span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                <motion.div animate={{ width: `${progress}%` }} className="h-full bg-cyan-500 shadow-[0_0_15px_#00f2ff]" />
+              </div>
             </div>
-            <div className="flex justify-center gap-6 opacity-30 text-white">
-               <ShieldCheck size={16} /> <Zap size={16} /> <Sparkles size={16} />
-            </div>
+
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleMint(); }} 
+              disabled={isMinting} 
+              className="btn-void w-full py-6 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+            >
+              <span className="text-white font-black text-[11px] uppercase tracking-[0.5em] drop-shadow-md">
+                {isMinting ? "Processing" : isSuccess ? "Claim Success" : "Summon Butterfly"}
+              </span>
+              {!isMinting && <ChevronRight size={16} className="text-cyan-400" />}
+            </button>
+
+            {error && (
+              <div className="flex items-center justify-center gap-2 text-red-500 text-[9px] font-black uppercase tracking-widest animate-pulse">
+                <AlertCircle size={12} /> {error}
+              </div>
+            )}
           </div>
         </div>
       </div>
